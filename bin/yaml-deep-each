@@ -1,12 +1,31 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-if ARGV.size != 1 || ARGV[0] == "--help" || ARGV[0] == "-h"
-  puts "USAGE: ... | each CODE"
-  exit
+require "dorian/arguments"
+require "dorian/to_struct"
+require "yaml"
+
+def deep_each(json, &block)
+  yield(json.to_deep_struct)
+
+  if json.is_a?(Hash)
+    json.each { |key, value| deep_each([key, value], &block) }
+  elsif json.is_a?(Array)
+    json.each { |element| deep_each(element, &block) }
+  end
 end
 
-$stdin.each_line do |it|
-  it.strip!
-  eval(ARGV.first)
+parsed = Dorian::Arguments.parse(version: { alias: :v }, help: { alias: :h })
+
+abort parsed.help if parsed.options.help
+
+if parsed.options.version
+  abort File.read(File.expand_path("../../VERSION", __FILE__))
+end
+
+inputs = parsed.files.map { |file| File.read(file) }
+inputs = [$stdin.each_line.to_a.join] if inputs.empty?
+
+inputs.each do |input|
+  deep_each(YAML.safe_load(input)) { |it| eval(parsed.arguments.join(" ")) }
 end
