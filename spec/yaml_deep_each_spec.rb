@@ -12,10 +12,10 @@ RSpec.describe "yaml-deep-each" do
       - 3
     INPUT
     expect(`cat #{file.path} | bin/yaml-deep-each "p it"`).to eq(<<~OUTPUT)
-    [1, 2, 3]
-    1
-    2
-    3
+      [1, 2, 3]
+      1
+      2
+      3
     OUTPUT
   end
 end
