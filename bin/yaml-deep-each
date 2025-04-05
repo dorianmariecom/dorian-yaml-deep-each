@@ -5,13 +5,13 @@ require "dorian/arguments"
 require "dorian/to_struct"
 require "yaml"
 
-def deep_each(json, &block)
+def deep_each(json, &)
   yield(json.to_deep_struct)
 
   if json.is_a?(Hash)
-    json.each { |key, value| deep_each([key, value], &block) }
+    json.each { |key, value| deep_each([key, value], &) }
   elsif json.is_a?(Array)
-    json.each { |element| deep_each(element, &block) }
+    json.each { |element| deep_each(element, &) }
   end
 end
 
